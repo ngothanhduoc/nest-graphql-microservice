@@ -7,14 +7,14 @@ import { PinoLogger } from "nestjs-pino";
 
 import { QueryUtils } from "../utils/query.utils";
 
-@Resolver("User")
-export class UsersTypeResolver implements OnModuleInit {
+@Resolver("Saving")
+export class SavingsTypeResolver implements OnModuleInit {
   constructor(
     private readonly queryUtils: QueryUtils,
 
     private readonly logger: PinoLogger
   ) {
-    logger.setContext(UsersTypeResolver.name);
+    logger.setContext(SavingsTypeResolver.name);
   }
 
   onModuleInit(): void {}

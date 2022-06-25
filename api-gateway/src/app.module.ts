@@ -14,9 +14,8 @@ import {
 import { GraphQLJSONObject } from "graphql-type-json";
 
 import { AuthModule } from "./auth/auth.module";
-// import { CommentsModule } from './comments/comments.module'
-// import { PostsModule } from './posts/posts.module'
 import { UsersModule } from "./users/users.module";
+import { SavingsModule } from "./savings/savings.module";
 
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 
@@ -37,50 +36,9 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
       driver: ApolloDriver,
       typePaths: ["./**/*.schema.graphql"],
     }),
-
-    // GraphQLModule.forRootAsync({
-    //   imports: [LoggerModule],
-    //   driver: ApolloDriver,
-    //   typePaths: ["./**/*.graphql"],
-    //   useFactory: async (logger: PinoLogger): Promise<GqlModuleOptions> => ({
-    //     path: "/",
-    //     // subscriptions: '/',
-    //     typePaths: ["./**/*.graphql"],
-    //     resolvers: {
-    //       DateTime: DateTimeResolver,
-    //       EmailAddress: EmailAddressResolver,
-    //       UnsignedInt: UnsignedIntResolver,
-    //       JSONObject: GraphQLJSONObject,
-    //     },
-    //     definitions: {
-    //       path: join(__dirname, "graphql.ts"),
-    //     },
-    //     // logger,
-    //     // debug: true,
-    //     // cors: false,
-    //     // installSubscriptionHandlers: true,
-    //     // playground: {
-    //     //   endpoint: "/",
-    //     //   subscriptionEndpoint: "/",
-    //     //   settings: {
-    //     //     "request.credentials": "include",
-    //     //   },
-    //     //   tabs: [
-    //     //     {
-    //     //       name: "GraphQL API",
-    //     //       endpoint: "/",
-    //     //       query: playgroundQuery,
-    //     //     },
-    //     //   ],
-    //     // },
-    //     context: ({ req, res }): any => ({ req, res }),
-    //   }),
-    //   inject: [PinoLogger],
-    // }),
     AuthModule,
     UsersModule,
-    // PostsModule,
-    // CommentsModule
+    SavingsModule,
   ],
 })
 export class AppModule {}

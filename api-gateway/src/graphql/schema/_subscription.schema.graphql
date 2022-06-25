@@ -1,7 +1,0 @@
-type Subscription {
-  # Comments Subscription
-  commentAdded(post: ID!): Comment!
-
-  # Posts Subscription
-  postAdded: Post!
-}

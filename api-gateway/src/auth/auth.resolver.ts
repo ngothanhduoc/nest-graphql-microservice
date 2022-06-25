@@ -7,23 +7,29 @@ import { PinoLogger } from "nestjs-pino";
 
 import { AuthService } from "./auth.service";
 import { RefreshAuthGuard } from "./refresh-auth.guard";
+import { GqlAuthGuard } from "./gql-auth.guard";
 import { CurrentUser } from "./user.decorator";
 
 import { IUsersService } from "../users/users.interface";
 import {
   User,
+  Saving,
   SignupUserInput,
   UserPayload,
   LoginUserInput,
 } from "../graphql/typings";
 
 import { PasswordUtils } from "../utils/password.utils";
+import { ISavingsService } from "../savings/savings.interface";
 
 @Resolver()
 export class AuthResolver implements OnModuleInit {
   constructor(
     @Inject("UsersServiceClient")
     private readonly usersServiceClient: ClientGrpcProxy,
+
+    @Inject("SavingsServiceClient")
+    private readonly savingsServiceClient: ClientGrpcProxy,
 
     private readonly authService: AuthService,
 
@@ -35,10 +41,14 @@ export class AuthResolver implements OnModuleInit {
   }
 
   private usersService: IUsersService;
+  private savingsService: ISavingsService;
 
   onModuleInit(): void {
     this.usersService = this.usersServiceClient.getService<IUsersService>(
       "UsersService"
+    );
+    this.savingsService = this.savingsServiceClient.getService<ISavingsService>(
+      "SavingsService"
     );
   }
 
@@ -52,6 +62,7 @@ export class AuthResolver implements OnModuleInit {
 
     if (count >= 1) throw new Error("Email taken");
 
+    this.logger.info(`usersService info =>>>>>`, this.usersService);
     const user: User = await this.usersService
       .create({
         ...data,
@@ -59,14 +70,27 @@ export class AuthResolver implements OnModuleInit {
       })
       .toPromise();
 
-    return { user };
+    this.logger.info(`Saving info =>>>>>`, this.savingsService);
+
+    const saving: Saving = await this.savingsService
+      .create({
+        usersId: user.id,
+        balanceAmount: 0,
+      })
+      .toPromise();
+
+    this.logger.info(`Saving info ${saving}`);
+    const accessToken = await this.authService.generateAccessToken(user);
+    const refreshToken = await this.authService.generateRefreshToken(user);
+
+    return { user, accessToken, refreshToken };
   }
 
   @Mutation()
   async login(
     @Context() context: any,
     @Args("data") data: LoginUserInput
-  ): Promise<UserPayload> {
+  ): Promise<any> {
     const { res } = context;
 
     const user: any = await this.usersService
@@ -84,24 +108,9 @@ export class AuthResolver implements OnModuleInit {
 
     if (!isSame) throw new Error("Unable to login");
 
-    // res?.cookie(
-    //   "access-token",
-    //   await this.authService.generateAccessToken(user),
-    //   {
-    //     httpOnly: true,
-    //     maxAge: 1.8e6,
-    //   }
-    // );
-    // res?.cookie(
-    //   "refresh-token",
-    //   await this.authService.generateRefreshToken(user),
-    //   {
-    //     httpOnly: true,
-    //     maxAge: 1.728e8,
-    //   }
-    // );
-
-    return { user };
+    const accessToken = await this.authService.generateAccessToken(user);
+    const refreshToken = await this.authService.generateRefreshToken(user);
+    return { user, accessToken, refreshToken };
   }
 
   @Mutation()
@@ -112,39 +121,16 @@ export class AuthResolver implements OnModuleInit {
   ): Promise<UserPayload> {
     const { res } = context;
 
-    res.cookie(
-      "access-token",
-      await this.authService.generateAccessToken(user),
-      {
-        httpOnly: true,
-        maxAge: 1.8e6,
-      }
-    );
-    res.cookie(
-      "refresh-token",
-      await this.authService.generateRefreshToken(user),
-      {
-        httpOnly: true,
-        maxAge: 1.728e8,
-      }
-    );
+    const accessToken = await this.authService.generateAccessToken(user);
+    const refreshToken = await this.authService.generateRefreshToken(user);
 
-    return { user };
+    return { user, accessToken, refreshToken };
   }
 
   @Mutation()
+  @UseGuards(GqlAuthGuard)
   async logout(@Context() context: any): Promise<boolean> {
     const { res } = context;
-
-    res.cookie("access-token", "", {
-      httpOnly: true,
-      maxAge: 0,
-    });
-    res.cookie("refresh-token", "", {
-      httpOnly: true,
-      maxAge: 0,
-    });
-
     return true;
   }
 }

@@ -8,27 +8,29 @@ import {
   ClientGrpcProxy,
 } from "@nestjs/microservices";
 
-import { UsersTypeResolver } from "./users-type.resolver";
-import { UsersQueryResolver } from "./users-query.resolver";
-import { UsersMutationResolver } from "./users-mutation.resolver";
+import { SavingsTypeResolver } from "./savings-type.resolver";
+import { SavingsQueryResolver } from "./savings-query.resolver";
+import { SavingMutationResolver } from "./savings-mutation.resolver";
 
 import { UtilsModule } from "../utils/utils.module";
 
 @Module({
   imports: [ConfigModule, LoggerModule, UtilsModule],
   providers: [
-    UsersTypeResolver,
-    UsersQueryResolver,
-    UsersMutationResolver,
+    SavingsTypeResolver,
+    SavingsQueryResolver,
+    SavingMutationResolver,
     {
-      provide: "UsersServiceClient",
+      provide: "SavingsServiceClient",
       useFactory: (configService: ConfigService): ClientGrpcProxy => {
+        console.log(configService.get<string>("SAVINGS_SVC_URL"));
+
         return ClientProxyFactory.create({
           transport: Transport.GRPC,
           options: {
-            url: configService.get<string>("USERS_SVC_URL"),
-            package: "user",
-            protoPath: join(__dirname, "../_proto/user.proto"),
+            url: configService.get<string>("SAVINGS_SVC_URL"),
+            package: "saving",
+            protoPath: join(__dirname, "../_proto/saving.proto"),
             loader: {
               keepCase: true,
               enums: String,
@@ -41,6 +43,6 @@ import { UtilsModule } from "../utils/utils.module";
       inject: [ConfigService],
     },
   ],
-  exports: ["UsersServiceClient"],
+  exports: ["SavingsServiceClient"],
 })
-export class UsersModule {}
+export class SavingsModule {}

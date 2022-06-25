@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package wallet;
+
+import "commons.proto";
+
+message Wallet {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string password = 4;
+  int32 age = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+  int32 version = 8;
+}
+
+message WalletEdge {
+  Wallet node = 1;
+  string cursor = 2;
+}
+
+message CreateWalletInput {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+  int32 age = 4;
+}
+
+message UpdateWalletInput {
+  string id = 1;
+  Wallet data = 2;
+}
+
+message FindWalletPayload {
+  repeated WalletEdge edges = 1;
+  commons.PageInfo pageInfo = 2;
+}
+
+service WalletService {
+  rpc find (commons.Query) returns (FindWalletPayload) {}
+  rpc findById (commons.Id) returns (Wallet) {}
+  rpc findOne (commons.Query) returns (Wallet) {}
+  rpc count (commons.Query) returns (commons.Count) {}
+  rpc create (CreateWalletInput) returns (Wallet) {}
+  rpc update (UpdateWalletInput) returns (Wallet) {}
+  rpc destroy (commons.Query) returns (commons.Count) {}
+}
