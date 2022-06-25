@@ -1,47 +1,57 @@
-import * as paginate from 'sequelize-cursor-pagination'
-import { Column, Model, Table, DataType, Index } from 'sequelize-typescript'
+import {
+  makePaginate,
+  PaginateOptions,
+  PaginationConnection,
+} from "sequelize-cursor-pagination";
+import { Column, Model, Table, DataType, Index } from "sequelize-typescript";
 
 @Table({
-  modelName: 'user',
-  tableName: 'users'
+  modelName: "user",
+  tableName: "users",
 })
 export class User extends Model<User> {
   @Column({
     primaryKey: true,
     type: DataType.UUID,
     defaultValue: DataType.UUIDV1,
-    comment: 'The identifier for the user record.'
+    comment: "The identifier for the user record.",
   })
-  id: string
+  id: string;
 
-  @Index('user_name')
+  @Index("user_name")
   @Column({
     type: DataType.TEXT,
-    comment: "The user's name."
+    comment: "The user's name.",
   })
-  name: string
+  name: string;
 
-  @Index('user_email')
+  @Index("user_email")
   @Column({
     type: DataType.TEXT,
-    comment: "The user's email."
+    comment: "The user's email.",
   })
-  email: string
+  email: string;
 
   @Column({
     type: DataType.TEXT,
-    comment: "The user's password."
+    comment: "The user's password.",
   })
-  password: string
+  password: string;
 
   @Column({
     type: DataType.INTEGER,
-    comment: "The user's age."
+    comment: "The user's age.",
   })
-  age: number
+  age: number;
+
+  // declare static paginate: (
+  //   options: PaginateOptions<User>
+  // ) => Promise<PaginationConnection<User>>;
 }
 
-paginate({
-  methodName: 'findAndPaginate',
-  primaryKeyField: 'id'
-})(User)
+// paginate.({
+//   methodName: "findAndPaginate",
+//   primaryKeyField: "id",
+// })(User);
+
+// User.paginate = makePaginate(User);

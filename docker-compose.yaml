@@ -33,7 +33,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    restart: "on-failure"
+    # restart: "on-failure"
 
   api-gateway:
     image: "api-gateway:dev"
@@ -54,10 +54,10 @@ services:
       JWT_REFRESHTOKEN_SECRET: "tPQz6vb7nJDilma85OQExilvgZX+QyEf1CL95DmfBLA="
       JWT_ISSUER: "application"
       JWT_AUDIENCE: "public"
-      COMMENTS_SVC_URL: "comments-svc:50051"
-      POSTS_SVC_URL: "posts-svc:50051"
+      # COMMENTS_SVC_URL: "comments-svc:50051"
+      # POSTS_SVC_URL: "posts-svc:50051"
       USERS_SVC_URL: "users-svc:50051"
-      MAILER_SVC_URL: "mailer-svc:50051"
+      # MAILER_SVC_URL: "mailer-svc:50051"
       REDIS_HOST: "cache"
       REDIS_PORT: "6379"
     healthcheck:
@@ -70,10 +70,10 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    restart: "on-failure"
+    # restart: "on-failure"
 
   users-db:
-    image: "postgres:12-alpine"
+    image: "postgres"
     container_name: "users-db"
     networks:
       - "usersdomain"
@@ -89,7 +89,7 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
-    restart: "on-failure"
+    # restart: "on-failure"
 
   cache:
     image: "redis:5-alpine"

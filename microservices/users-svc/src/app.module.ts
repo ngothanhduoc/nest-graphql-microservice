@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
-import { SequelizeModule, SequelizeModuleOptions } from '@nestjs/sequelize'
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { SequelizeModule, SequelizeModuleOptions } from "@nestjs/sequelize";
 
-import { Op, OperatorsAliases } from 'sequelize'
-import { LoggerModule, PinoLogger } from 'nestjs-pino'
+import { Op, OperatorsAliases } from "sequelize";
+import { LoggerModule, PinoLogger } from "nestjs-pino";
 
-import { UsersModule } from './users/users.module'
+import { UsersModule } from "./users/users.module";
 
 const operatorsAliases: OperatorsAliases = {
   _and: Op.and,
@@ -44,8 +44,8 @@ const operatorsAliases: OperatorsAliases = {
   _strictRight: Op.strictRight,
   _noExtendRight: Op.noExtendRight,
   _noExtendLeft: Op.noExtendLeft,
-  _values: Op.values
-}
+  _values: Op.values,
+};
 
 @Module({
   imports: [
@@ -55,37 +55,40 @@ const operatorsAliases: OperatorsAliases = {
       useFactory: async (configService: ConfigService) => ({
         pinoHttp: {
           safe: true,
-          prettyPrint: configService.get<string>('NODE_ENV') !== 'production'
-        }
+          prettyPrint: configService.get<string>("NODE_ENV") !== "production",
+        },
       }),
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
     SequelizeModule.forRootAsync({
       imports: [ConfigModule, LoggerModule],
-      useFactory: async (configService: ConfigService, logger: PinoLogger): Promise<SequelizeModuleOptions> => ({
-        dialect: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
+      useFactory: async (
+        configService: ConfigService,
+        logger: PinoLogger
+      ): Promise<SequelizeModuleOptions> => ({
+        dialect: "postgres",
+        host: configService.get<string>("DB_HOST"),
+        port: configService.get<number>("DB_PORT"),
+        username: configService.get<string>("DB_USERNAME"),
+        password: configService.get<string>("DB_PASSWORD"),
+        database: configService.get<string>("DB_DATABASE"),
         logging: logger.info.bind(logger),
         typeValidation: true,
         benchmark: true,
         native: true,
         operatorsAliases,
         autoLoadModels: true,
-        synchronize: configService.get<boolean>('DB_SYNC'),
+        synchronize: configService.get<boolean>("DB_SYNC"),
         define: {
           timestamps: true,
           underscored: true,
           version: true,
-          schema: configService.get<string>('DB_SCHEMA')
-        }
+          schema: configService.get<string>("DB_SCHEMA"),
+        },
       }),
-      inject: [ConfigService, PinoLogger]
+      inject: [ConfigService, PinoLogger],
     }),
-    UsersModule
-  ]
+    UsersModule,
+  ],
 })
 export class AppModule {}
