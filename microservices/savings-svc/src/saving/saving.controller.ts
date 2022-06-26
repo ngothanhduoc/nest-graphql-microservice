@@ -12,6 +12,8 @@ import { IFindPayload } from "../commons/cursor-pagination.interface";
 import { Saving } from "./saving.model";
 import { SavingsDto, DepositSavingsDot } from "./saving.dto";
 
+import { actionType } from "../constants/action.constant";
+
 const { map } = Aigle;
 
 @Controller()
@@ -24,10 +26,10 @@ export class SavingsController {
   }
 
   @GrpcMethod("SavingsService", "findOne")
-  async findOne(query: IQuery): Promise<Saving> {
+  async findOne(query: IQuery): Promise<SavingsDto> {
     this.logger.info("SavingsController#findOne.call %o", query);
 
-    const result: Saving = await this.service.findOne({
+    const result: SavingsDto = await this.service.findOne({
       attributes: !isEmpty(query.select) ? query.select : undefined,
       where: !isEmpty(query.where) ? JSON.parse(query.where) : undefined,
     });
@@ -51,14 +53,15 @@ export class SavingsController {
   }
 
   @GrpcMethod("SavingsService", "update")
-  async update(data: DepositSavingsDot): Promise<SavingsDto> {
+  async deposit(data: DepositSavingsDot): Promise<SavingsDto> {
     this.logger.info(
       "SavingsController#update.call %o %o",
       data.usersId,
       data.amount
     );
-
-    const result: SavingsDto = await this.service.update(data);
+    const type =
+      Number(data.amount) < 0 ? actionType.withdraw : actionType.deposit;
+    const result: SavingsDto = await this.service.update(data, type);
 
     this.logger.info("SavingsController#update.result %o", result);
 

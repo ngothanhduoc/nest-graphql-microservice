@@ -67,31 +67,50 @@ export class SavingMutationResolver implements OnModuleInit {
   @Mutation()
   @UseGuards(GqlAuthGuard)
   async withdrawSaving(
-    @CurrentUser() saving: any,
+    @CurrentUser() user: any,
     @Args("data") data: DepositWithdrawSavingInput
   ): Promise<any> {
-    // const isSame: boolean = await this.passwordUtils.compare(
-    //   data.currentPassword,
-    //   saving.password
-    // );
-    // const isConfirmed: boolean = data.newPassword === data.confirmPassword;
-
-    // if (!isSame || !isConfirmed) {
-    //   throw new Error("Error updating password. Kindly check your passwords.");
-    // }
-
-    // const password: string = await this.passwordUtils.hash(data.newPassword);
-
-    // const updatedSaving: any = await this.savingsService.update({
-    //   id: saving.id,
-    //   data: {
-    //     password,
-    //   },
-    // });
     console.log("Call withdrawSaving");
+    if (Number(data.amount) <= 0) {
+      return {
+        errors: [
+          {
+            field: "amount",
+            message: ["Amount must be greater than 0"],
+          },
+        ],
+      };
+    }
+
+    const amount = await this.savingsService
+      .findOne({
+        where: JSON.stringify({ users_id: user.id }),
+      })
+      .toPromise();
+
+    if (Number(amount.balanceAmount) === 0) {
+      return {
+        errors: [
+          {
+            field: "balance",
+            message: ["Your balance is currently 0"],
+          },
+        ],
+      };
+    }
+
+    const amountWithdraw = -Number(data.amount);
+    const saving: SavingsDto = await this.savingsService
+      .update({
+        usersId: user.id,
+        amount: amountWithdraw,
+      })
+      .toPromise();
+
+    console.log("Call depositSaving result amount", saving);
 
     return {
-      balanceAmount: data.amount,
+      balanceAmount: saving.balanceAmount,
     };
   }
 }

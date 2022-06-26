@@ -4,7 +4,7 @@ import { Saving } from "./saving.model";
 import { SavingsDto, DepositSavingsDot } from "./saving.dto";
 
 export interface ISavingsService {
-  findOne(query?: FindOptions): Promise<Saving>;
+  findOne(query?: FindOptions): Promise<SavingsDto>;
   create(saving: SavingsDto): Promise<Saving>;
-  update(deposit: DepositSavingsDot): Promise<SavingsDto>;
+  update(deposit: DepositSavingsDot, type: string): Promise<SavingsDto>;
 }
