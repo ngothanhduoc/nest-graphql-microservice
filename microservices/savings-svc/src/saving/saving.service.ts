@@ -89,7 +89,10 @@ export class SavingsService implements ISavingsService {
       transactionData,
       { transaction: t }
     );
-    this.logger.info("SavingsService#create.transaction %o", transactionResult);
+    this.logger.info(
+      "TransactionsService#create.transaction %o",
+      transactionResult
+    );
 
     const result: Saving = await record.update(saving, { transaction: t });
 
