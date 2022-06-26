@@ -5,14 +5,10 @@ import { Sequelize } from "sequelize-typescript";
 
 import { Saving } from "./saving.model";
 import { Transaction } from "./transaction.model";
-import { User } from "./user.model";
 import { TaskSchedulingService } from "./task-scheduling.service";
 
 @Module({
-  imports: [
-    LoggerModule,
-    SequelizeModule.forFeature([Saving, Transaction, User]),
-  ],
+  imports: [LoggerModule, SequelizeModule.forFeature([Saving, Transaction])],
   providers: [
     TaskSchedulingService,
     { provide: "SEQUELIZE", useExisting: Sequelize },

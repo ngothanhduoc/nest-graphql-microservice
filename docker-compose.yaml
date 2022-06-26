@@ -14,7 +14,6 @@ services:
       - "50051"
     depends_on:
       - "users-db"
-      - "cache"
     environment:
       NODE_ENV: "test"
       GRPC_HOST: "0.0.0.0"
@@ -26,14 +25,111 @@ services:
       DB_DATABASE: "postgres"
       DB_SCHEMA: "public"
       DB_SYNC: "true"
-      REDIS_HOST: "cache"
-      REDIS_PORT: "6379"
     healthcheck:
       test: [ "CMD", "/bin/grpc_health_probe", "-addr=:50051" ]
       interval: 30s
       timeout: 10s
       retries: 5
     # restart: "on-failure"
+  savings-svc:
+    image: "savings-svc:dev"
+    container_name: "savings-svc"
+    build:
+      context: "./microservices/savings-svc"
+    networks:
+      - "frontend"
+      - "backend"
+      - "savingsdomain"
+    expose:
+      - "50051"
+    depends_on:
+      - "savings-db"
+    environment:
+      NODE_ENV: "test"
+      GRPC_HOST: "0.0.0.0"
+      GRPC_PORT: "50051"
+      DB_HOST: "savings-db"
+      DB_PORT: "5432"
+      DB_USERNAME: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_DATABASE: "postgres"
+      DB_SCHEMA: "public"
+      DB_SYNC: "true"
+    healthcheck:
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=:50051" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    # restart: "on-failure"
+
+  task-schedulings-svc:
+    image: "task-schedulings-svc:dev"
+    container_name: "task-schedulings-svc"
+    build:
+      context: "./microservices/task-schedulings-svc"
+    networks:
+      - "backend"
+      - "savingsdomain"
+      - "queuedomain"
+    expose:
+      - "50051"
+    depends_on:
+      - "savings-db"
+      - "rabbitmq"
+    environment:
+      NODE_ENV: "test"
+      DB_HOST: "savings-db"
+      DB_PORT: "5432"
+      DB_USERNAME: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_DATABASE: "postgres"
+      DB_SCHEMA: "public"
+      DB_SYNC: "true"
+      # CRON_EXPRESSION: "59 23 * * *"
+      CRON_EXPRESSION: "*/10 * * * * *"
+      NUMBER_USER_OF_PART: 5
+      RABBIT_URL: "amqp://guest:guest@rabbitmq:5672/"
+      QUEUE_SAVING_NAME: "savings"
+    healthcheck:
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=:50051" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: "on-failure"
+
+  workers-svc:
+    image: "workers-svc:dev"
+    container_name: "workers-svc"
+    build:
+      context: "./microservices/workers-svc"
+    networks:
+      - "backend"
+      - "savingsdomain"
+      - "queuedomain"
+    expose:
+      - "50051"
+    depends_on:
+      - "savings-db"
+      - "rabbitmq"
+    environment:
+      NODE_ENV: "test"
+      DB_HOST: "savings-db"
+      DB_PORT: "5432"
+      DB_USERNAME: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_DATABASE: "postgres"
+      DB_SCHEMA: "public"
+      DB_SYNC: "true"
+      SAVING_FIXED_INTEREST: 7
+      NUMBER_USER_OF_PART: 5
+      RABBIT_URL: "amqp://guest:guest@rabbitmq:5672/"
+      QUEUE_SAVING_NAME: "savings"
+    healthcheck:
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=:50051" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: "on-failure"
 
   api-gateway:
     image: "api-gateway:dev"
@@ -45,8 +141,8 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - "cache"
       - "users-svc"
+      - "savings-svc"
     environment:
       NODE_ENV: "test"
       GRAPHQL_PORT: "3000"
@@ -54,12 +150,8 @@ services:
       JWT_REFRESHTOKEN_SECRET: "tPQz6vb7nJDilma85OQExilvgZX+QyEf1CL95DmfBLA="
       JWT_ISSUER: "application"
       JWT_AUDIENCE: "public"
-      # COMMENTS_SVC_URL: "comments-svc:50051"
-      # POSTS_SVC_URL: "posts-svc:50051"
+      SAVINGS_SVC_URL: "savings-svc:50051"
       USERS_SVC_URL: "users-svc:50051"
-      # MAILER_SVC_URL: "mailer-svc:50051"
-      REDIS_HOST: "cache"
-      REDIS_PORT: "6379"
     healthcheck:
       test:
         [
@@ -79,6 +171,8 @@ services:
       - "usersdomain"
     expose:
       - "5432"
+    ports:
+      - "5551:5432"
     volumes:
       - usersdata:/var/lib/postgresql/data
     environment:
@@ -91,26 +185,52 @@ services:
       retries: 3
     # restart: "on-failure"
 
-  cache:
-    image: "redis:5-alpine"
-    container_name: "redis-cache"
+  savings-db:
+    image: "postgres"
+    container_name: "savings-db"
     networks:
-      - "frontend"
-      - "backend"
+      - "savingsdomain"
     expose:
-      - "6379"
+      - "5432"
+    ports:
+      - "5552:5432"
+    volumes:
+      - savingsdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
     healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'redis-cli PING'" ]
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U postgres'" ]
       interval: 30s
       timeout: 30s
       retries: 3
-    restart: "on-failure"
+    # restart: "on-failure"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    expose:
+      - "5672"
+    ports:
+      - 5553:5672
+      - 5554:15672
+    volumes:
+      - rabbitmqdata/:/var/lib/rabbitmq/
+      - rabbitmqlog:/var/log/rabbitmq
+    networks:
+      - queuedomain
+    # default rabbitmq user & pass: guest
 
 networks:
   frontend:
   backend:
   usersdomain:
+  savingsdomain:
+  queuedomain:
 
 
 volumes:
   usersdata:
+  savingsdata:
+  rabbitmqdata:
+  rabbitmqlog:

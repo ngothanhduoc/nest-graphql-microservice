@@ -82,7 +82,7 @@ export class SavingsService implements ISavingsService {
       type: type || "DEPOSIT",
     };
     const t = await this.sequelizeInstance.transaction({
-      logging: true, // Just for debugging purposes
+      logging: false, // Just for debugging purposes
     });
 
     const transactionResult = await this.repoTransaction.create(
