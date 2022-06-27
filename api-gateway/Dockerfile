@@ -7,10 +7,10 @@ ADD src tsconfig.json tsconfig.build.json package.json _proto ./
 RUN apk add --virtual builds-deps build-base python3
 
 RUN npm install --force
-
+RUN npm run copy:protos && npm run copy:graph
 RUN npm run build
 
-RUN npm run copy:protos && npm run copy:graph
+
 
 FROM node:14-alpine
 
