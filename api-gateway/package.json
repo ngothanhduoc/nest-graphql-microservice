@@ -15,7 +15,7 @@
     "test:coverage": "jest --coverage",
     "generate:typings": "ts-node ./src/graphql/generate-typings",
     "copy:protos": "cpy ./_proto ./src/_proto",
-    "copy:graph": "cp ./src/graphql/schema/*.schema.graphql dist/"
+    "copy:graph": "cpy ./src/graphql/schema/*.schema.graphql dist/"
   },
   "dependencies": {
     "@apollo/gateway": "^2.0.5",
