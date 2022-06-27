@@ -10,7 +10,6 @@ RUN apk add  make g++ python3 postgresql-dev \
   && npm install --force
 
 RUN npm run build
-RUN npm run copy:protos_dist
 
 FROM node:14-alpine
 
