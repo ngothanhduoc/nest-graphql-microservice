@@ -2,7 +2,7 @@ import { Inject, OnModuleInit, UseGuards } from "@nestjs/common";
 import { ClientGrpcProxy } from "@nestjs/microservices";
 import { Resolver, Args, Mutation, Context } from "@nestjs/graphql";
 
-import { isEmpty } from "lodash";
+import { isEmpty, isNull } from "lodash";
 import { PinoLogger } from "nestjs-pino";
 
 import { AuthService } from "./auth.service";
@@ -93,13 +93,19 @@ export class AuthResolver implements OnModuleInit {
   ): Promise<any> {
     const { res } = context;
 
+    const { count } = await this.usersService
+      .count({
+        where: JSON.stringify({ email: data.email }),
+      })
+      .toPromise();
+
+    if (count === 0) throw new Error("Unable to login");
+
     const user: any = await this.usersService
       .findOne({
         where: JSON.stringify({ email: data.email }),
       })
       .toPromise();
-
-    if (isEmpty(user)) throw new Error("Unable to login");
 
     const isSame: boolean = await this.passwordUtils.compare(
       data.password,

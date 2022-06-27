@@ -1,4 +1,6 @@
-# NestJS GraphQL API + gRPC microservices
+# Infina Tech Lead - Architecture System Design Mini Project
+
+NestJS GraphQL API + gRPC microservices + RabbitMQ
 
 This project is a [monorepo](https://gomonorepo.org/) containing a [GraphQL](https://graphql.org/) API with [gRPC](https://grpc.io/) back-end microservices built using the [NestJS framework](https://nestjs.com/). This project is mainly used for learning/trial and boilerplate purposes only.
 
@@ -15,7 +17,7 @@ When creating GraphQL APIs, one must understand what [Graph Theory](https://en.w
 3. Comments are authored by users and are linked/submitted to posts.
 
 ## Architecture Overview
- 
+
 The GraphQL API acts as a gateway/proxy for the different microservices it exposes. The resolvers of the GraphQL API make calls to the gRPC microservices through client-server communication. The services and the data interchange are defined using [Protocol Buffers](https://developers.google.com/protocol-buffers/). The gRPC microservices handle and fulfill the requests whether they are database or storage operations or any other internal or external calls.
 
 ### Diagram
@@ -72,18 +74,18 @@ You must install the following on your local machine:
 
 ### API Gateway
 
-* [ ] Add unit tests
-* [x] Add refresh token support
-* [ ] Add request/input data validation
-* [ ] Improve logging
-* [ ] Improve error handling
-* [ ] Add DataLoader support
+- [ ] Add unit tests
+- [x] Add refresh token support
+- [ ] Add request/input data validation
+- [ ] Improve logging
+- [ ] Improve error handling
+- [ ] Add DataLoader support
 
 ### Microservices
 
-* [x] Add authorization
-* [ ] Add caching
-* [ ] Add health checks
-* [ ] Add unit tests
-* [ ] Improve logging
-* [ ] Improve error handling
+- [x] Add authorization
+- [ ] Add caching
+- [ ] Add health checks
+- [ ] Add unit tests
+- [ ] Improve logging
+- [ ] Improve error handling

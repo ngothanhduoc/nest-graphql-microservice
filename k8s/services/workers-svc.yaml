@@ -2,13 +2,13 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: posts-svc
+  name: workers-svc
   namespace: dev
   labels:
-    app: posts-svc
+    app: workers-svc
 spec:
   selector:
-    app: posts-svc
+    app: workers-svc
   ports:
     - name: http
       port: 80

@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: task-schedulings-svc
+  namespace: dev
+  labels:
+    app: task-schedulings-svc
+data:
+  NODE_ENV: 'development'
+  GRPC_HOST: '0.0.0.0'
+  GRPC_PORT: '50051'
+  CRON_EXPRESSION: '59 23 * * *'
+  NUMBER_USER_OF_PART: '5'

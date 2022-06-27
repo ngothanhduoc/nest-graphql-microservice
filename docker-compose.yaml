@@ -30,7 +30,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    # restart: "on-failure"
+    restart: "on-failure"
   savings-svc:
     image: "savings-svc:dev"
     container_name: "savings-svc"

@@ -2,15 +2,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comments-svc
+  name: workers-svc
   namespace: dev
   labels:
-    app: comments-svc
+    app: workers-svc
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: comments-svc
+      app: workers-svc
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -19,11 +19,11 @@ spec:
   template:
     metadata:
       labels:
-        app: comments-svc
+        app: workers-svc
     spec:
       containers:
-        - name: comments-svc
-          image: "comments-svc:latest"
+        - name: workers-svc
+          image: 'workers-svc:latest'
           imagePullPolicy: Always
           resources:
             requests:
@@ -34,20 +34,20 @@ spec:
               memory: 300Mi
           envFrom:
             - configMapRef:
-                name: comments-svc
+                name: workers-svc
             - secretRef:
                 name: database
             - secretRef:
                 name: cache
           ports:
             - name: http
-              containerPort: 50051
+              containerPort: 3000
               protocol: TCP
           livenessProbe:
             exec:
               command:
-                - "/bin/grpc_health_probe"
-                - "-addr=:50051"
+                - '/bin/grpc_health_probe'
+                - '-addr=:3000'
             initialDelaySeconds: 10
             periodSeconds: 30
             successThreshold: 1
@@ -56,44 +56,36 @@ spec:
           readinessProbe:
             exec:
               command:
-                - "/bin/grpc_health_probe"
-                - "-addr=:50051"
+                - '/bin/grpc_health_probe'
+                - '-addr=:3000'
             initialDelaySeconds: 5
             periodSeconds: 30
             successThreshold: 1
             failureThreshold: 3
             timeoutSeconds: 10
       terminationGracePeriodSeconds: 60
-      # affinity:
-      #   nodeAffinity:
-      #     requiredDuringSchedulingIgnoredDuringExecution:
-      #       nodeSelectorTerms:
-      #         - matchExpressions:
-      #           - key: node-pool
-      #             operator: In
-      #             values:
-      #               - dev
-# ---
-# apiVersion: autoscaling/v2beta1
-# kind: HorizontalPodAutoscaler
-# metadata:
-#   name: comments-svc
-#   namespace: dev
-#   labels:
-#     app: comments-svc
-# spec:
-#   scaleTargetRef:
-#     apiVersion: apps/v1
-#     name: comments-svc
-#     kind: Deployment
-#   minReplicas: 3
-#   maxReplicas: 10
-#   metrics:
-#     - type: Resource
-#       resource:
-#         name: cpu
-#         targetAverageUtilization: 80
-#     - type: Resource
-#       resource:
-#         name: memory
-#         targetAverageUtilization: 80
+
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: workers-svc
+  namespace: dev
+  labels:
+    app: workers-svc
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    name: workers-svc
+    kind: Deployment
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: 80

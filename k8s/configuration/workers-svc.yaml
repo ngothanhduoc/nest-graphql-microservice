@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: workers-svc
+  namespace: dev
+  labels:
+    app: workers-svc
+data:
+  NODE_ENV: 'development'
+  GRPC_HOST: '0.0.0.0'
+  GRPC_PORT: '50051'
+  SAVING_FIXED_INTEREST: '7'
+  NUMBER_USER_OF_PART: '5'

@@ -2,13 +2,13 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: comments-svc
+  name: savings-svc
   namespace: dev
   labels:
-    app: comments-svc
+    app: savings-svc
 spec:
   selector:
-    app: comments-svc
+    app: savings-svc
   ports:
     - name: http
       port: 80

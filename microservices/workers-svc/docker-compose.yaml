@@ -2,64 +2,81 @@ version: "3"
 
 services:
 
-  users-svc:
+  workers-svc:
+    image: "workers-svc:dev"
+    container_name: "workers-svc"
     build:
-      context: "."
+      context: "./microservices/workers-svc"
     networks:
-      - "users-svc"
-    ports:
-      - "50051:50051"
+      - "workers-svc"
+      - "queuedomain"
+    expose:
+      - "50051"
     depends_on:
-      - "db"
-      - "cache"
+      - "savings-db"
+      - "rabbitmq"
     environment:
       NODE_ENV: "test"
-      GRPC_HOST: "0.0.0.0"
-      GRPC_PORT: "50051"
-      DB_HOST: "db"
+      DB_HOST: "savings-db"
       DB_PORT: "5432"
       DB_USERNAME: "postgres"
       DB_PASSWORD: "postgres"
       DB_DATABASE: "postgres"
       DB_SCHEMA: "public"
-      DB_SYNC: true
-      REDIS_HOST: "cache"
-      REDIS_PORT: "6379"
+      DB_SYNC: "true"
+      SAVING_FIXED_INTEREST: 7
+      NUMBER_USER_OF_PART: 5
+      RABBIT_URL: "amqp://guest:guest@rabbitmq:5672/"
+      QUEUE_SAVING_NAME: "savings"
     healthcheck:
-      test: ["CMD", "/bin/grpc_health_probe", "-addr=:50051"]
+      test: [ "CMD", "/bin/grpc_health_probe", "-addr=:50051" ]
       interval: 30s
       timeout: 10s
       retries: 5
     restart: "on-failure"
 
-  db:
-    image: "postgres:12-alpine"
+  savings-db:
+    image: "postgres"
+    container_name: "savings-db"
     networks:
-      - "users-svc"
+      - "workers-svc"
     expose:
       - "5432"
+    ports:
+      - "5552:5432"
+    volumes:
+      - savingsdata:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres'"]
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U postgres'" ]
       interval: 30s
       timeout: 30s
       retries: 3
     restart: "on-failure"
 
-  cache:
-    image: "redis:5-alpine"
-    networks:
-      - "users-svc"
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
     expose:
-      - "6379"
-    healthcheck:
-      test: ["CMD-SHELL", "sh -c 'redis-cli PING'"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
-    restart: "on-failure"
+      - "5672"
+    ports:
+      - 5553:5672
+      - 5554:15672
+    volumes:
+      - rabbitmqdata/:/var/lib/rabbitmq/
+      - rabbitmqlog:/var/log/rabbitmq
+    networks:
+      - queuedomain
+    # default rabbitmq user & pass: guest
 
 networks:
-  users-svc:
+  workers-svc:
+  queuedomain:
+
+
+volumes:
+  savingsdata:
+  rabbitmqdata:
+  rabbitmqlog:

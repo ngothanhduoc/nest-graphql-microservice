@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq
+  namespace: dev
+type: Opaque
+data:
+  RABBIT_URL: 'amqp://guest:guest@rabbitmq:5672/'
+  QUEUE_SAVING_NAME: 'savings'
