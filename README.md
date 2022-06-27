@@ -40,9 +40,18 @@ This architecture implements the following Microservice Design Patterns:
 
 ![Model](./docs/img/model_daigram.png)
 
+1. Users table for Users Service
+
+- Contains basic information on Customer
+
 ![Users Table](./docs/img/users_table.png)
-![Users Table](./docs/img/savings_table.png)
-![Users Table](./docs/img/transactions_table.png)
+
+2. Savings and Transactions for Savings Service
+
+- Savings: store passbook and balance information
+- Transactions: store transaction information such as Deposit, Withdraw and Saving. Each event that changes the balance in the passbook corresponds to a row of data in this table.
+  ![Savings Table](./docs/img/savings_table.png)
+  ![Transactions Table](./docs/img/transactions_table.png)
 
 ## Layers
 
