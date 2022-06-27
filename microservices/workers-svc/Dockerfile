@@ -25,4 +25,4 @@ COPY --from=build /usr/share/users-svc .
 
 EXPOSE 50051
 
-CMD ["node", "main.js"]
+CMD ["npm", "run", "start"]
