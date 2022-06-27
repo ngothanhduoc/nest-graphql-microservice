@@ -49,9 +49,12 @@ This architecture implements the following Microservice Design Patterns:
 2. Savings and Transactions for Savings Service
 
 - Savings: store passbook and balance information
-- Transactions: store transaction information such as Deposit, Withdraw and Saving. Each event that changes the balance in the passbook corresponds to a row of data in this table.
-  ![Savings Table](./docs/img/savings_table.png)
-  ![Transactions Table](./docs/img/transactions_table.png)
+
+![Savings Table](./docs/img/savings_table.png)
+
+- Transactions: store transaction information such as Deposit, Withdraw and Saving. Each event that changes the balance in the Savings Table corresponds to a row of data in this table.
+
+![Transactions Table](./docs/img/transactions_table.png)
 
 ## Layers
 
