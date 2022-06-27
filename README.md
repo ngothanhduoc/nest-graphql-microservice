@@ -105,3 +105,11 @@ References:
 5. https://www.apollographql.com/docs/federation/federation-spec/
 6. https://docs.nestjs.com/graphql/migration-guide
 7. https://docs.nestjs.com/graphql/federation
+
+# TODO
+
+In this Project, I still lack two components, Unit testing and Integration testing, because I don't have enough time to complete these two important components.
+
+## Unit testing
+
+## Integration testing
