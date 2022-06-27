@@ -2,19 +2,20 @@
 
 NestJS GraphQL API + gRPC microservices + RabbitMQ
 
-This project is a [monorepo](https://gomonorepo.org/) containing a [GraphQL](https://graphql.org/) API with [gRPC](https://grpc.io/) back-end microservices built using the [NestJS framework](https://nestjs.com/). This project is mainly used for learning/trial and boilerplate purposes only.
+This project is a mono-repository containing a [GraphQL](https://graphql.org/) API with [gRPC](https://grpc.io/) back-end microservices and [RabbitMQ](https://www.rabbitmq.com/) for queue built using the [NestJS framework](https://nestjs.com/).
 
 ## Graph Model
 
-When creating GraphQL APIs, one must understand what [Graph Theory](https://en.wikipedia.org/wiki/Graph_theory) and Graph Data Modelling are. One must also [think in graphs](https://graphql.org/learn/thinking-in-graphs/) as per the GraphQL specification recommends. A diagram of the graph data model is shown below.
+A diagram of the graph data model is shown below.
 
-![Graph Model](https://raw.githubusercontent.com/benjsicam/nestjs-graphql-microservices/master/docs/img/graph-model.png)
+![Graph Model](./docs/img/graph-model.png)
 
 ### Explanation
 
-1. Users can write both posts and comments therefore, users are authors posts and comments.
-2. Posts are authored by users and comments can be linked/submitted for them.
-3. Comments are authored by users and are linked/submitted to posts.
+1. Each User has a savings account with the money in it.
+2. Each Saving is associated with a single user. Contains information about the amount in a savings account.
+3. Task Scheduling is a Cron Job that is launched every day at 23:59:00 every day (Can be set up in Env) which is responsible for getting the Savings list of all customers in the Database into parts (Each Part contains a certain number of Saving accounts, the number of Parts can be configured in Env) and pushing it to the Queue.
+4. The Worker reads all the Messages in the Queue. Process data to add savings interest to savings accounts.
 
 ## Architecture Overview
 
@@ -24,7 +25,7 @@ The GraphQL API acts as a gateway/proxy for the different microservices it expos
 
 A diagram of the architecture is shown below.
 
-![Architecture Diagram](https://raw.githubusercontent.com/benjsicam/nestjs-graphql-microservices/master/docs/img/archi-diagram.png)
+![Architecture Diagram](./docs/img/archi-diagram.png)
 
 This architecture implements the following Microservice Design Patterns:
 
@@ -34,6 +35,14 @@ This architecture implements the following Microservice Design Patterns:
 4. [Remote Procedure Invocation](https://microservices.io/patterns/communication-style/rpi.html)
 5. [API Gateway](https://microservices.io/patterns/apigateway.html)
 6. [Database per Service](https://microservices.io/patterns/data/database-per-service.html)
+
+### Database Design
+
+![Model](./docs/img/model_daigram.png)
+
+![Users Table](./docs/img/users_table.png)
+![Users Table](./docs/img/savings_table.png)
+![Users Table](./docs/img/transactions_table.png)
 
 ## Layers
 
@@ -49,9 +58,13 @@ This architecture implements the following Microservice Design Patterns:
 
 PostgreSQL is used as the database and [Sequelize](https://sequelize.org) is used as the Object-Relational Mapper (ORM).
 
+### Message Queuing Layer
+
+In this project, I use RabbitMQ to build a Queue system. A message queue is a form of asynchronous service-to-service communication used in serverless and microservices architectures. Messages are stored on the queue until they are processed and deleted. Each message is processed only once, by a single consumer. Message queues can be used to decouple heavyweight processing, to buffer or batch work, and to smooth spiky workloads.
+
 ## Deployment
 
-Deployment is done with containers in mind. A Docker Compose file along with Dockerfiles for the GraphQL API Gateway and each microservice are given to run the whole thing on any machine. For production, it's always recommended to use [Kubernetes](https://kubernetes.io/) for these kinds of microservices architecture to deploy in production. [Istio](https://istio.io/) takes care of service discovery, distributed tracing and other observability requirements.
+Deployment is done with containers in mind. A Docker Compose file along with Dockerfiles for the GraphQL API Gateway and each microservice are given to run the whole thing on any machine. For production, use [Kubernetes](https://kubernetes.io/) for these kinds of microservices architecture to deploy in production. [Istio](https://istio.io/) takes care of service discovery, distributed tracing and other observability requirements.
 
 ## How to Run
 
@@ -59,33 +72,24 @@ Deployment is done with containers in mind. A Docker Compose file along with Doc
 
 You must install the following on your local machine:
 
-1. Node.js (v12.x recommended)
+1. Node.js (v14.x recommended)
 2. Docker
 3. Docker Compose
 4. PostgreSQL Client (libpq as required by [pg-native](https://www.npmjs.com/package/pg-native#install))
+5. RabbitMQ
 
 ### Running
 
-1. On the Terminal, go into the project's root folder (`cd /project/root/folder`) and execute `npm start`. The start script will install all npm dependencies for all projects, lint the code, transpile the code, build the artifacts (Docker images) and run all of them via `docker-compose`.
+1. On the Terminal, go into the project's root folder (`cd /project/root/folder`) and execute `npm start`. The start script will install all npm dependencies for all projects, transpile the code, build the artifacts (Docker images) and run all of them via `docker-compose`.
 
 2. Once the start script is done, the GraphQL Playground will be running on [http://localhost:3000](http://localhost:3000)
 
-## Roadmap
+References:
 
-### API Gateway
-
-- [ ] Add unit tests
-- [x] Add refresh token support
-- [ ] Add request/input data validation
-- [ ] Improve logging
-- [ ] Improve error handling
-- [ ] Add DataLoader support
-
-### Microservices
-
-- [x] Add authorization
-- [ ] Add caching
-- [ ] Add health checks
-- [ ] Add unit tests
-- [ ] Improve logging
-- [ ] Improve error handling
+1. https://www.apollographql.com/docs/federation/
+2. https://www.apollographql.com/docs/federation/federation-2/new-in-federation-2
+3. https://github.com/apollographql/supergraph-demo-fed2
+4. https://github.com/benjsicam/nestjs-graphql-microservices
+5. https://www.apollographql.com/docs/federation/federation-spec/
+6. https://docs.nestjs.com/graphql/migration-guide
+7. https://docs.nestjs.com/graphql/federation

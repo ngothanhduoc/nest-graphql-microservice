@@ -10,7 +10,7 @@
     "docker:build": "docker-compose build",
     "docker:start": "docker-compose up",
     "docker:teardown": "docker-compose down",
-    "start": "npm run install && npm run lint && npm run build && npm run docker:start"
+    "start": "npm run install && npm run build && npm run docker:start"
   },
   "repository": {
     "type": "git",
