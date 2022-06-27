@@ -2,12 +2,14 @@ FROM node:14.19.1-alpine as build
 
 WORKDIR /usr/share/users-svc
 
-ADD dist package.json ./
+ADD src tsconfig.json tsconfig.build.json package.json ./
 
 RUN apk add --virtual builds-deps build-base python3
 
 RUN apk add  make g++ python3 postgresql-dev \
-  && npm install
+  && npm install --force
+
+RUN npm run build
 
 FROM node:14-alpine
 

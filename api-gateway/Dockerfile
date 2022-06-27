@@ -2,11 +2,13 @@ FROM node:14.19.3-alpine as build
 
 WORKDIR /usr/share/api-gateway
 
-COPY dist package.json ./
+ADD src tsconfig.json tsconfig.build.json package.json ./
 
 RUN apk add --virtual builds-deps build-base python3
 
-RUN npm install
+RUN npm install --force
+
+RUN npm run build
 
 FROM node:14-alpine
 
