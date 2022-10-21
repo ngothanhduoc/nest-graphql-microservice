@@ -1,4 +1,4 @@
-name: Launchy-Backend Production Build
+name: Nest Worker Build
 
 on:
   push:
