@@ -1,11 +1,11 @@
-name: Nest Worker Build
+name: Nest RC Worker Build
 
 on:
   push:
     branches:
       - "main"
     tags:
-      - "*-rc-worker"
+      - "*-worker-rc"
 
 jobs:
   build:
